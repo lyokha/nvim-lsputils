@@ -17,7 +17,7 @@ function M.close_selected_handler(index, command)
 	    start = {
 		line = item.lnum - 1,
 		--TODO: robust character column
-		character = item.col
+		character = item.col - 1
 	    }
 	}
     }
