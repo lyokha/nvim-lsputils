@@ -64,10 +64,12 @@ local function references_handler(_, locations, ctx, _)
 	print 'Busy with some LSP popup'
 	return
     end
+    local client = vim.lsp.get_client_by_id(ctx.client_id)
+    local offset_encoding = client.offset_encoding
     local bufnr = ctx.bufnr
     local data = {}
     local filename = vim.api.nvim_buf_get_name(bufnr)
-    action.items = vim.lsp.util.locations_to_items(locations)
+    action.items = vim.lsp.util.locations_to_items(locations, offset_encoding)
     for i, item in pairs(action.items) do
 	data[i] = item.text
 	if filename ~= item.filename then
@@ -101,6 +103,8 @@ local definition_handler = function(_,locations, ctx, _)
     if locations == nil or vim.tbl_isempty(locations) then
 	return
     end
+    local client = vim.lsp.get_client_by_id(ctx.client_id)
+    local offset_encoding = client.offset_encoding
     local bufnr = ctx.bufnr
     if vim.tbl_islist(locations) then
 	if #locations > 1 then
@@ -110,7 +114,7 @@ local definition_handler = function(_,locations, ctx, _)
 	    end
 	    local data = {}
 	    local filename = vim.api.nvim_buf_get_name(bufnr)
-	    action.items = vim.lsp.util.locations_to_items(locations)
+	    action.items = vim.lsp.util.locations_to_items(locations, offset_encoding)
 	    for i, item in pairs(action.items) do
 		data[i] = item.text
 		if filename ~= item.filename then
@@ -138,10 +142,10 @@ local definition_handler = function(_,locations, ctx, _)
 	    end
 	    opts.data = nil
 	else
-	    vim.lsp.util.jump_to_location(locations[1])
+	    vim.lsp.util.jump_to_location(locations[1], offset_encoding)
 	end
     else
-	vim.lsp.util.jump_to_location(locations)
+	vim.lsp.util.jump_to_location(locations, offset_encoding)
     end
 end
 

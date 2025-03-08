@@ -1,5 +1,6 @@
 local M = {}
 local api = vim.api
+local offset_encoding = "utf-8"
 -- close handler
 -- jump to location in a new vertical split
 -- according to index and result returned by server.
@@ -30,7 +31,7 @@ function M.close_selected_handler(index, command)
 	local buffer = api.nvim_get_current_buf()
         vim.cmd(string.format(":tab sb %d", buffer))
     end
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding)
     vim.cmd(':normal! zz')
     M.items = nil
 end
@@ -94,6 +95,9 @@ function M.close_tab(self)
 end
 
 function M.close_edit(self)
+    local buf = vim.fn.winbufnr(self.originalWindow)
+    local clients = vim.lsp.get_clients({bufnr = buf})
+    offset_encoding = #clients > 0 and clients[1].offset_encoding or "utf-8"
     self:close(M.close_selected_handler)
 end
 
@@ -107,7 +111,7 @@ function M.codeaction_selection_handler(index)
     local action = M.actionBuffer[index]
     if action.edit or type(action.command) == "table" then
 	if action.edit then
-	    vim.lsp.util.apply_workspace_edit(action.edit)
+	    vim.lsp.util.apply_workspace_edit(action.edit, offset_encoding)
 	end
 	if type(action.command) == "table" then
 	    vim.lsp.buf.execute_command(action.command)
